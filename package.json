@@ -1,0 +1,23 @@
+{
+  "name": "madsonic-listservice",
+  "version": "0.0.0",
+  "description": "madsonic-listservice",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dreagan",
+  "license": "ISC",
+  "homepage": "",
+  "dependencies": {
+    "async": "^2.4.1",
+    "joi": "^10.5.2",
+    "node-class": "^0.3.12",
+    "restify": "^4.3.0",
+    "shuffle-array": "^1.0.1",
+    "winston": "^2.3.1"
+  }
+}
