@@ -1,26 +1,3 @@
-// init vars
-var _httpOptions = {
-	headers: {
-		"Content-Type": "application/json"
-	},
-	retry: {
-	'retries': 0
-	},
-	agent: false
-};
-var _port = "1004";
-var _MadsonicAPILocation = "http://84.197.169.234:4041";
-
-// init requirements:
-var Async   = require('async');
-var Winston = require("./node_logging/logger.js")("madsonic-listservice");
-
-var _user = "admin";
-var _pass = "admin";
-
-// INIT Restify
-var Restify = require('restify');
-
 var init = function()
 {
 	// startup Restify server
@@ -34,9 +11,9 @@ var init = function()
 
 	server.post("/artists/toptracks", createArtistsTopTracksList);
 
-	server.listen(_port, serverUpHandler);
+	server.listen(config.port, serverUpHandler);
 
-	Winston.info("Server listening through port " + _port + ".");
+	Winston.info("Server listening through port " + config.port + ".");
 }
 
 var mainHandler = function(request, result, next)
@@ -54,7 +31,7 @@ var onUncaughtException = function(request, response, route, err)
 
 var serverUpHandler = function()
 {
-	Winston.log('info', 'Restify server up and running on port ' + _port);
+	Winston.log('info', 'Restify server up and running on port ' + config.port);
 };
 
 
@@ -101,7 +78,7 @@ var createArtistsTopTracksList = function(request, response, next)
 var getArtistTopTracks = function(artist, callback)
 {
 	var options = JSON.parse(JSON.stringify(_httpOptions));
-	options.url = 'http://localhost:1003';
+	options.url = config.api.lastfmservice.location;
 	var client = Restify.createJSONClient(options);
 
 	var endpoint = '/artist/toptracks?artist=' + encodeURIComponent(artist) + '&limit=10';
@@ -117,7 +94,7 @@ var getSongsForLastFmTracks = function(lastFmTracks, callback)
 {
 	// prepare request
 	var options = JSON.parse(JSON.stringify(_httpOptions));
-	options.url = 'http://localhost:1002';
+	options.url = config.api.songservice.location;
 	var client = Restify.createJSONClient(options);
 
 	// call songService for each track
@@ -145,12 +122,12 @@ var createList = function(name, songs, callback)
 {
 	// prepare rest call
 	var options = JSON.parse(JSON.stringify(_httpOptions));
-	options.url = _MadsonicAPILocation;
+	options.url = config.api.madsonic.location;
 	var client = Restify.createJSONClient(options);
 
 	var endpoint = '/rest2/createPlaylist.view';
-	endpoint += '?v=2.5.0&c=work-pc-rest&f=json&u=' + _user;
-	endpoint += '&p=' + _pass;
+	endpoint += '?v=2.5.0&c=work-pc-rest&f=json&u=' + config.api.madsonic.user;
+	endpoint += '&p=' + config.api.madsonic.pass;
 	endpoint += '&name=' + encodeURIComponent(name);
 
 	// loop through songs to add to the query
@@ -167,6 +144,26 @@ var createList = function(name, songs, callback)
 		if(!err) Winston.info("List created.");
 		callback(err);
 	});
+};
+
+// init requirements:
+var Async   = require('async');
+var Restify = require('restify');
+var Winston = require("./node_logging/logger.js")("madsonic-listservice");
+
+// config
+var config = require('./config.json');
+Winston.info('Started with the following config:\n', JSON.stringify(config));
+
+// init vars
+var _httpOptions = {
+	headers: {
+		"Content-Type": "application/json"
+	},
+	retry: {
+	'retries': 0
+	},
+	agent: false
 };
 
 init();
